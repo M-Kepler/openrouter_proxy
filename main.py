@@ -392,23 +392,23 @@ class KeyManager:
                 key_data = await self.redis_client.hgetall(f"keyinfo:{key_str}")
                 if key_data:
                     async with key_info.lock:
-                        key_info.enabled = key_data.get(b"enabled", b"1") == b"1"
+                        key_info.enabled = key_data.get("enabled", b"1") == b"1"
                         key_info.total_requests = int(
-                            key_data.get(b"total_requests", b"0")
+                            key_data.get("total_requests", b"0")
                         )
                         key_info.rate_limited_until = float(
-                            key_data.get(b"rate_limited_until", b"0.0")
+                            key_data.get("rate_limited_until", b"0.0")
                         )
                         key_info.last_used_time = float(
-                            key_data.get(b"last_used_time", b"0.0")
+                            key_data.get("last_used_time", b"0.0")
                         )
 
                         # Load timestamps
-                        timestamps_str = key_data.get(b"timestamps", b"")
+                        timestamps_str = key_data.get("timestamps", b"")
                         if timestamps_str:
                             key_info.timestamps = [
                                 float(ts)
-                                for ts in timestamps_str.decode().split(",")
+                                for ts in timestamps_str.split(",")
                                 if ts
                             ]
                             # Prune old timestamps on load
