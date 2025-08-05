@@ -1161,7 +1161,7 @@ if __name__ == "__main__":
 
     # Use settings loaded by Pydantic
     uvicorn.run(
-        "main:app",
+        app,
         host=settings.host,
         port=settings.port,
         workers=settings.workers,
