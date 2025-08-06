@@ -105,9 +105,9 @@ class Settings(BaseSettings):
     openrouter_api_base: str = Field(
         "https://openrouter.ai/api/v1", validation_alias="OPENROUTER_API_BASE"
     )
-    retry_delay_seconds: float = Field(0.1, validation_alias="RETRY_DELAY_SECONDS")
+    retry_delay_seconds: float = Field(1, validation_alias="RETRY_DELAY_SECONDS")
     rpd_limit: int = Field(
-        200, validation_alias="RPD_LIMIT"
+        50, validation_alias="RPD_LIMIT"
     )  # Still useful for reference/display
     rpd_limit_patterns: List[str] = Field(
         default=[
