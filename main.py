@@ -83,9 +83,9 @@ class Settings(BaseSettings):
     openrouter_api_base: str = Field(
         "https://openrouter.ai/api/v1", validation_alias="OPENROUTER_API_BASE"
     )
-    retry_delay_seconds: float = Field(0.1, validation_alias="RETRY_DELAY_SECONDS")
+    retry_delay_seconds: float = Field(1, validation_alias="RETRY_DELAY_SECONDS")
     rpd_limit: int = Field(
-        200, validation_alias="RPD_LIMIT"
+        50, validation_alias="RPD_LIMIT"
     )  # Still useful for reference/display
     rpd_limit_patterns: List[str] = Field(
         default=[
@@ -100,6 +100,7 @@ class Settings(BaseSettings):
     host: str = Field("0.0.0.0", validation_alias="HOST")
     port: int = Field(8000, validation_alias="PORT")
     workers: int = Field(1, validation_alias="WORKERS")
+    secret: str = Field(None, validation_alias="SECRET")
 
     # Retry settings for error prefixes in 200 OK responses
     retry_error_prefixes: List[str] = Field(
@@ -933,6 +934,14 @@ async def proxy_openrouter(request: Request, path: str):
     Applies cooldown if rate limit errors occur.
     Implements retry mechanism for streaming errors.
     """
+    if settings.secret:
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer ") or auth_header != f'Bearer {settings.secret}':
+            logger.warning("Missing or invalid Authorization header")
+            raise HTTPException(
+                status_code=401,
+                detail="Authorization header with Bearer token is required.",
+            )
     body = await request.body()
     model_name = None
     use_proxy_keys = True  # Default to using proxy keys
@@ -1153,7 +1162,7 @@ if __name__ == "__main__":
 
     # Use settings loaded by Pydantic
     uvicorn.run(
-        "main:app",
+        app,
         host=settings.host,
         port=settings.port,
         workers=settings.workers,
